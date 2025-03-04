@@ -3,4 +3,4 @@ Resources:
   RamaECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: naga-spring-boot-hello
+      RepositoryName: rama-spring-boot-hello

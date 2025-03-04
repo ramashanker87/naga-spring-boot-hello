@@ -9,4 +9,8 @@ public class Hello {
     public String sayHello(){
         return "Hello From App";
     }
+    @GetMapping("/greet")
+    public String sayGreet(){
+        return "Greeting From App";
+    }
 }

@@ -7,19 +7,14 @@ Parameters:
   ShortSolution:
     Type: String
     Default: rama
+
 Resources:
-  # ECR Repository to store the Docker image
-  SpringBootECRRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: springboot-hello-world
-  # Log Group for cluster service log
   TheLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: "/ecs/fargate/hello"
+      LogGroupName: !Sub '${ShortSolution}-${Environment}/ecs/fargate/hello'
   # Task Execution Cluster
-  SpringBootECSCluster:
+  EcsCluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
       CapacityProviders:
@@ -43,7 +38,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
   # ECS Task Definition
-  SpringBootTaskDefinition:
+  FargateTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family:  !Sub '${ShortSolution}-${Environment}-hello-task'
@@ -55,7 +50,7 @@ Resources:
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
         - Name:  !Sub '${ShortSolution}-${Environment}-hello-app'
-          Image: !Sub "${SpringBootECRRepository.RepositoryUri}:latest"
+          Image: 975050323630.dkr.ecr.us-east-1.amazonaws.com/rama-spring-boot-hello:latest
           HealthCheck:
             Command: [ "CMD-SHELL","curl -f http://localhost:8080/actuator/health/ || exit 1" ]
             Interval: 30
@@ -72,14 +67,14 @@ Resources:
               awslogs-stream-prefix: "ecs"
 
   # ECS Service
-  SpringBootECSService:
+  FargateService:
     Type: AWS::ECS::Service
     Properties:
       ServiceName:  !Sub '${ShortSolution}-${Environment}-hello-service'
-      Cluster: !Ref SpringBootECSCluster
+      Cluster: !Ref EcsCluster
       DesiredCount: 2
       LaunchType: FARGATE
-      TaskDefinition: !Ref SpringBootTaskDefinition
+      TaskDefinition: !Ref FargateTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -141,7 +136,6 @@ Resources:
       HealthCheckPath: "/actuator/health/"
       HealthCheckIntervalSeconds: 30
 
-
   #########################################################################################################
   #  ALB Listener
   # Listener: The ALB listens on port 80 and forwards incoming HTTP traffic to the ALB target group.
@@ -170,9 +164,6 @@ Resources:
           SourceSecurityGroupId: !Ref ALBSecurityGroup
 
 Outputs:
-  ECRRepositoryURI:
-    Value: !Ref SpringBootECRRepository
-    Description: "ECR repository URI for the Spring Boot Docker image"
   ALBDnsName:
     Description: "DNS name of the ALB"
     Value: !GetAtt ALB.DNSName

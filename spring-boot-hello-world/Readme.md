@@ -1,54 +1,55 @@
-## Build Application
+# spring-boot-hello-world
+ci cd repository for springboot
+## Create seprate repository in git hub
+
+## Clone the project
+
+## Create springboot application
+
+## Build Project
 
     mvn clean install
-## Run Locally and verify
-    
+
+## Run the project
+
     mvn spring-boot:run
-    http://localhost:8080/actuator/health
-    http://localhost:8080/hello
 
-## Dockerization
+## Dockerize the application
 
-    docker build -t spring-hello-app .
+    docker build -t spring-boot-hello-world .
 
-## List docker images
-
+## List docker image
+    
     docker images
 
-## Run and test application
+## Run and verify the docker images
 
-    docker run -p 8080:8080 spring-hello-app:latest
+    docker run -p 8080:8080 spring-boot-hello-world:latest
+    http://localhost:8080/hello
+    http://localhost:8080/actuator/health
 
-## Create ECR for hello app
-
+## Create ECR for Spring app
 ```Bash
-    aws cloudformation deploy --template-file 1-ecr-template.yml --stack-name rama-hello-ecr-repo 
+    aws cloudformation deploy --template-file ecr-template.yml --stack-name rama-spring-ecr-repo 
 ```
-### Login to ECR (for Docker):
+## Create Code build pipe
+    provide the github url
+    update the access token and verify its connected
+    checkbox for buildspec.yml
+    copy the role and keep it seprately
 
-```Bash
-    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 975050323630.dkr.ecr.us-east-1.amazonaws.com
-```
+## Trigger the Build
 
-### Tag Image with ECR Repository URL:
-```Bash
-    docker tag spring-hello-app:latest 975050323630.dkr.ecr.us-east-1.amazonaws.com/rama-hello-app:latest
-```
+## If it fails
 
-### Push images:
-```Bash
-    docker push 975050323630.dkr.ecr.us-east-1.amazonaws.com/rama-hello-app
-```
+    update the policy with folloing inline
+    AmazonEC2ContainerRegistryFullAccess
+    AmazonEC2ContainerRegistryPowerUser
+## ReBuild
+    Success
 
-### Create VPC Networking(Created only once do not run it if it exist)
-```Bash
-    aws cloudformation deploy --template-file 2-vpc-networking.yml --stack-name vpc-network
-```
 ## Create ECS Service and Task infra
 ```Bash
-    aws cloudformation deploy --template-file 3-ecs-farget-cluster.yml  --stack-name rama-cluster-hello --capabilities CAPABILITY_NAMED_IAM 
+    aws cloudformation deploy --template-file ecs-farget-cluster.yml  --stack-name rama-cluster-hello --capabilities CAPABILITY_NAMED_IAM 
 ```
-## Verify the rest end point
-
-    curl --location 'http://rama-test-hello-alb-1784220606.us-east-1.elb.amazonaws.com/hello'
-    curl --location 'http://rama-test-hello-alb-1784220606.us-east-1.elb.amazonaws.com/actuator/health'
+    

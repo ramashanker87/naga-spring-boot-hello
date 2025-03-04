@@ -1,1 +1,0 @@
-# naga-spring-boot-hello
